@@ -1,0 +1,269 @@
+{
+	"info": {
+		"_postman_id": "a2e3b4c5-d6e7-f8g9-h0i1-j2k3l4m5n6o7",
+		"name": "FakeStore API Tests",
+		"description": "Collection for testing the FakeStore API products endpoint",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get All Products",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test 1: Verify server response code (expected 200)",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// Test 2: Check if response body is valid JSON",
+							"pm.test(\"Response is valid JSON\", function () {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"// Parse response body",
+							"var responseBody = pm.response.json();",
+							"",
+							"// Test 3: Check if response is an array",
+							"pm.test(\"Response is an array\", function () {",
+							"    pm.expect(Array.isArray(responseBody)).to.be.true;",
+							"});",
+							"",
+							"// Initialize arrays to store defective products",
+							"var emptyTitleProducts = [];",
+							"var negativePriceProducts = [];",
+							"var excessiveRatingProducts = [];",
+							"",
+							"// Test 4: Check product attributes",
+							"pm.test(\"Each product has required attributes\", function () {",
+							"    responseBody.forEach(function(product) {",
+							"        // Check if product has id",
+							"        pm.expect(product).to.have.property('id');",
+							"        ",
+							"        // Check if product has title",
+							"        pm.expect(product).to.have.property('title');",
+							"        ",
+							"        // Check if product has price",
+							"        pm.expect(product).to.have.property('price');",
+							"        ",
+							"        // Check if product has rating",
+							"        pm.expect(product).to.have.property('rating');",
+							"        ",
+							"        // Check if rating has rate property",
+							"        pm.expect(product.rating).to.have.property('rate');",
+							"    });",
+							"});",
+							"",
+							"// Test 5: Check if title is not empty",
+							"pm.test(\"Product titles should not be empty\", function () {",
+							"    responseBody.forEach(function(product) {",
+							"        if (!product.title || product.title.trim() === '') {",
+							"            emptyTitleProducts.push({",
+							"                id: product.id,",
+							"                title: product.title",
+							"            });",
+							"        }",
+							"    });",
+							"    ",
+							"    // Report defects if found",
+							"    if (emptyTitleProducts.length > 0) {",
+							"        console.log('Products with empty titles:', emptyTitleProducts);",
+							"    }",
+							"    ",
+							"    pm.expect(emptyTitleProducts.length).to.equal(0, 'Found ' + emptyTitleProducts.length + ' products with empty titles');",
+							"});",
+							"",
+							"// Test 6: Check if price is not negative",
+							"pm.test(\"Product prices should not be negative\", function () {",
+							"    responseBody.forEach(function(product) {",
+							"        if (product.price < 0) {",
+							"            negativePriceProducts.push({",
+							"                id: product.id,",
+							"                title: product.title,",
+							"                price: product.price",
+							"            });",
+							"        }",
+							"    });",
+							"    ",
+							"    // Report defects if found",
+							"    if (negativePriceProducts.length > 0) {",
+							"        console.log('Products with negative prices:', negativePriceProducts);",
+							"    }",
+							"    ",
+							"    pm.expect(negativePriceProducts.length).to.equal(0, 'Found ' + negativePriceProducts.length + ' products with negative prices');",
+							"});",
+							"",
+							"// Test 7: Check if rating.rate does not exceed 5",
+							"pm.test(\"Product ratings should not exceed 5\", function () {",
+							"    responseBody.forEach(function(product) {",
+							"        if (product.rating && product.rating.rate > 5) {",
+							"            excessiveRatingProducts.push({",
+							"                id: product.id,",
+							"                title: product.title,",
+							"                rating: product.rating.rate",
+							"            });",
+							"        }",
+							"    });",
+							"    ",
+							"    // Report defects if found",
+							"    if (excessiveRatingProducts.length > 0) {",
+							"        console.log('Products with ratings exceeding 5:', excessiveRatingProducts);",
+							"    }",
+							"    ",
+							"    pm.expect(excessiveRatingProducts.length).to.equal(0, 'Found ' + excessiveRatingProducts.length + ' products with ratings exceeding 5');",
+							"});",
+							"",
+							"// Generate summary report",
+							"var defectiveProducts = {",
+							"    emptyTitle: emptyTitleProducts,",
+							"    negativePrice: negativePriceProducts,",
+							"    excessiveRating: excessiveRatingProducts",
+							"};",
+							"",
+							"// Set environment variable to store defective products for other requests",
+							"pm.environment.set('defectiveProducts', JSON.stringify(defectiveProducts));",
+							"",
+							"// Print overall summary",
+							"console.log('--- FAKESTORE API TEST RESULTS ---');",
+							"console.log('Total products tested:', responseBody.length);",
+							"console.log('Products with empty titles:', emptyTitleProducts.length);",
+							"console.log('Products with negative prices:', negativePriceProducts.length);",
+							"console.log('Products with ratings exceeding 5:', excessiveRatingProducts.length);",
+							"console.log('----------------------------');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://fakestoreapi.com/products",
+					"protocol": "https",
+					"host": [
+						"fakestoreapi",
+						"com"
+					],
+					"path": [
+						"products"
+					]
+				},
+				"description": "Get all products from the FakeStore API and run validation tests"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Single Product",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test 1: Verify server response code (expected 200)",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// Test 2: Check if response body is valid JSON",
+							"pm.test(\"Response is valid JSON\", function () {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"// Parse response body",
+							"var product = pm.response.json();",
+							"var defects = [];",
+							"",
+							"// Test 3: Check single product attribute validation",
+							"pm.test(\"Product has all required attributes\", function () {",
+							"    pm.expect(product).to.have.property('id');",
+							"    pm.expect(product).to.have.property('title');",
+							"    pm.expect(product).to.have.property('price');",
+							"    pm.expect(product).to.have.property('rating');",
+							"    pm.expect(product.rating).to.have.property('rate');",
+							"});",
+							"",
+							"// Test 4: Title is not empty",
+							"pm.test(\"Product title should not be empty\", function () {",
+							"    if (!product.title || product.title.trim() === '') {",
+							"        defects.push('Empty title');",
+							"    }",
+							"    pm.expect(product.title).to.not.be.empty;",
+							"});",
+							"",
+							"// Test 5: Price is not negative",
+							"pm.test(\"Product price should not be negative\", function () {",
+							"    if (product.price < 0) {",
+							"        defects.push('Negative price');",
+							"    }",
+							"    pm.expect(product.price).to.be.at.least(0);",
+							"});",
+							"",
+							"// Test 6: Rating does not exceed 5",
+							"pm.test(\"Product rating should not exceed 5\", function () {",
+							"    if (product.rating && product.rating.rate > 5) {",
+							"        defects.push('Rating exceeds 5');",
+							"    }",
+							"    pm.expect(product.rating.rate).to.be.at.most(5);",
+							"});",
+							"",
+							"// Report defects if found",
+							"if (defects.length > 0) {",
+							"    console.log('Product ID ' + product.id + ' has defects:', defects.join(', '));",
+							"    console.log('Product details:', product);",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://fakestoreapi.com/products/1",
+					"protocol": "https",
+					"host": [
+						"fakestoreapi",
+						"com"
+					],
+					"path": [
+						"products",
+						"1"
+					]
+				},
+				"description": "Get a single product to run detailed tests"
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://fakestoreapi.com",
+			"type": "string"
+		}
+	]
+} 
